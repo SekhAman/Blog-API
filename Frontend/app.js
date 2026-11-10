@@ -37,7 +37,7 @@ async function loadPostDetail(postId) {
     detailContainer.textContent = "Loading post...";
 
     try {
-        const response = await fetch(`http://localhost:3000/post/${postId}`);
+        const response = await fetch(`https://blog-api-9wsb.onrender.com/post/${postId}`);
 
         if (!response.ok) {
             throw new Error(`Request failed: ${response.status}`);
@@ -140,7 +140,7 @@ function showDeleteConfirmation(post) {
 
 async function loadPosts(search = "") {
     const postsContainer = document.querySelector("#posts");
-    const url = new URL("http://localhost:3000/post");
+    const url = new URL("https://blog-api-9wsb.onrender.com/post");
 
         url.searchParams.set("search", search);
         url.searchParams.set("page", currentPage);
@@ -288,7 +288,7 @@ createPostForm.addEventListener("submit", async (event) => {
     const postData = Object.fromEntries(formData.entries());
 
     try {
-        const response = await fetch("http://localhost:3000/post", {
+        const response = await fetch("https://blog-api-9wsb.onrender.com/post", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -324,7 +324,7 @@ editPostForm.addEventListener("submit", async (event) => {
 
     try {
         const response = await fetch(
-            `http://localhost:3000/post/${postBeingEdited._id}`,
+            `https://blog-api-9wsb.onrender.com/post/${postBeingEdited._id}`,
             {
                 method: "PATCH",
                 headers: {
@@ -375,7 +375,7 @@ confirmDeleteButton.addEventListener("click", async () => {
 
     try {
         const response = await fetch(
-            `http://localhost:3000/post/${postBeingDeleted._id}`,
+            `https://blog-api-9wsb.onrender.com/post/${postBeingDeleted._id}`,
             {
                 method: "DELETE",
                 headers: {

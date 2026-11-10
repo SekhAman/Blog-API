@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";
+const API_URL = "https://blog-api-9wsb.onrender.com";
 
 const signupForm = document.querySelector("#signup-form");
 const signupMessage = document.querySelector("#signup-message");
