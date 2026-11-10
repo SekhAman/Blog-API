@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog Posts</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <main class="page">
+      <a class="account-link" href="account.html">Sign up or log in</a>
+      <h1 id="latest-posts">Latest posts</h1>
+
+      <form id="search-form">
+        <input
+          id="search-input"
+          type="search"
+          placeholder="Search posts..."
+          aria-label="Search posts"
+        />
+        <button type="submit">Search</button>
+      </form>
+
+      <button id="show-create-form" type="button">Create post</button>
+
+      <section id="create-post-view" hidden>
+        <h2>Create a post</h2>
+
+        <form id="create-post-form">
+          <label>
+            Title
+            <input name="title" required />
+          </label>
+
+          <label>
+            Description
+            <textarea name="description" required></textarea>
+          </label>
+
+          <button type="submit">Publish post</button>
+          <button id="cancel-create-form" type="button">Cancel</button>
+        </form>
+
+        <p id="create-post-message" aria-live="polite"></p>
+      </section>
+
+      <section id="edit-post-view" hidden>
+  <h2>Edit post</h2>
+
+  <form id="edit-post-form">
+    <label>
+      Title
+      <input name="title" required>
+    </label>
+
+    <label>
+      Description
+      <textarea name="description" required></textarea>
+    </label>
+
+    <button type="submit">Save changes</button>
+    <button id="cancel-edit-form" type="button">Cancel</button>
+  </form>
+
+  <p id="edit-post-message" aria-live="polite"></p>
+</section>
+
+<section id="delete-post-view" hidden>
+  <h2>Delete post?</h2>
+  <p id="delete-post-title"></p>
+
+  <button id="confirm-delete" type="button">Yes, delete</button>
+  <button id="cancel-delete" type="button">Cancel</button>
+
+  <p id="delete-post-message" aria-live="polite"></p>
+</section>
+
+      <section id="post-detail" aria-live="polite"></section>
+
+      <section id="posts" class="posts-grid" aria-label="Blog posts"></section>
+
+      <nav class="pagination" aria-label="Post pages">
+        <button id="previous-page" type="button">Previous</button>
+        <span id="page-info">Page 1</span>
+        <button id="next-page" type="button">Next</button>
+      </nav>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
