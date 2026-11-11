@@ -76,6 +76,7 @@ textarea:focus-visible {
     padding: 32px 0 64px;
 }
 
+.back,
 .account-link {
   display: inline-flex;
   align-items: center;
@@ -93,6 +94,7 @@ textarea:focus-visible {
   transition: background 160ms ease, transform 160ms ease;
 }
 
+.back:hover,
 .account-link:hover {
   background: var(--accent-hover);
   transform: translateY(-1px);
