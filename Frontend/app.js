@@ -32,6 +32,119 @@ const deletePostMessage = document.querySelector("#delete-post-message");
 
 let postBeingDeleted = null;
 
+
+
+// =================================
+// CATEGORY FILTERS
+// =================================
+
+let activeCategory = "all";
+
+const categoriesContainer = document.querySelector("#categories");
+
+function renderCategoryFilters(posts) {
+    if (!categoriesContainer) return;
+
+    const categories = [
+        ...new Set(
+            posts.map(post =>
+                (post.category || "General").trim()
+            ).filter(Boolean)
+        )
+    ];
+
+    if (
+        activeCategory !== "all" &&
+        !categories.some(category =>
+            category.toLowerCase() === activeCategory
+        )
+    ) {
+        activeCategory = "all";
+    }
+
+    categoriesContainer.replaceChildren();
+
+    const allCategories = ["All posts", ...categories];
+
+    allCategories.forEach((name, index) => {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "category";
+
+        const value = index === 0
+            ? "all"
+            : name.toLowerCase();
+
+        button.dataset.category = value;
+        button.textContent = name;
+
+        if (value === activeCategory) {
+            button.classList.add("active");
+        }
+
+        button.addEventListener("click", () => {
+            activeCategory = value;
+
+            categoriesContainer
+                .querySelectorAll(".category")
+                .forEach(btn => btn.classList.remove("active"));
+
+            button.classList.add("active");
+
+            document.querySelectorAll(".post-card").forEach(card => {
+                card.hidden =
+                    activeCategory !== "all" &&
+                    card.dataset.category !== activeCategory;
+            });
+        });
+
+        categoriesContainer.appendChild(button);
+    });
+}
+
+
+
+// =================================
+// THEME MANAGEMENT
+// =================================
+
+const themeToggle = document.querySelector("#themeToggle");
+
+function applyTheme(theme) {
+    document.body.classList.toggle("light", theme === "light");
+
+    if (themeToggle) {
+        themeToggle.textContent =
+            theme === "light" ? "🌙" : "☀️";
+    }
+
+    localStorage.setItem("blog-theme", theme);
+}
+
+applyTheme(localStorage.getItem("blog-theme") || "dark");
+
+themeToggle?.addEventListener("click", () => {
+    const newTheme = document.body.classList.contains("light")
+        ? "dark"
+        : "light";
+
+    applyTheme(newTheme);
+});
+
+// =================================
+// PROFILE AVATAR
+// =================================
+
+const profileAvatar = document.querySelector("#profile-avatar");
+
+if (profileAvatar) {
+    const username = localStorage.getItem("username") || "Guest";
+    profileAvatar.textContent = username.charAt(0).toUpperCase();
+    profileAvatar.title = username;
+}
+
+
 async function loadPostDetail(postId) {
     const detailContainer = document.querySelector("#post-detail");
     detailContainer.textContent = "Loading post...";
@@ -142,10 +255,10 @@ async function loadPosts(search = "") {
     const postsContainer = document.querySelector("#posts");
     const url = new URL("https://blog-api-9wsb.onrender.com/post");
 
-        url.searchParams.set("search", search);
-        url.searchParams.set("page", currentPage);
-        url.searchParams.set("limit", 5);
-    
+    url.searchParams.set("search", search);
+    url.searchParams.set("page", currentPage);
+    url.searchParams.set("limit", 5);
+
 
     // Use this URL in fetch:
 
@@ -161,6 +274,8 @@ async function loadPosts(search = "") {
         }
 
         const data = await response.json();
+
+        renderCategoryFilters(data.posts);
 
         currentPage = data.currentPage;
         totalPages = data.totalPages;
@@ -190,16 +305,50 @@ async function loadPosts(search = "") {
             let isExpanded = false;
 
             const editButton = document.createElement("button");
-editButton.textContent = "Edit";
-editButton.addEventListener("click", () => {
-    showEditForm(post);
-});
+            editButton.textContent = "Edit";
+            editButton.addEventListener("click", () => {
+                showEditForm(post);
 
-const deleteButton = document.createElement("button");
-deleteButton.textContent = "Delete";
-deleteButton.addEventListener("click", () => {
-    showDeleteConfirmation(post);
-});
+                const card = document.createElement("article");
+                card.className = "post-card";
+
+
+                // Category
+                const category = (post.category || "General")
+                    .trim()
+                    .toLowerCase();
+
+                card.dataset.category = category;
+
+                // Cover image
+                const coverUrl = post.coverImage || post.imageUrl;
+
+                let cover;
+
+                if (coverUrl) {
+                    cover = document.createElement("img");
+                    cover.src = coverUrl;
+                    cover.alt = "Post cover";
+                    cover.className = "post-cover";
+                    cover.loading = "lazy";
+                } else {
+                    cover = document.createElement("div");
+                    cover.className = "post-cover";
+                    cover.setAttribute("aria-hidden", "true");
+                }
+
+                // Category label
+                const categoryLabel = document.createElement("span");
+                categoryLabel.className = "post-category";
+                categoryLabel.textContent = category;
+
+            });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.addEventListener("click", () => {
+                showDeleteConfirmation(post);
+            });
 
             function updateDescription() {
                 description.textContent =
@@ -218,7 +367,12 @@ deleteButton.addEventListener("click", () => {
             viewButton.textContent = "View post";
             viewButton.addEventListener("click", () => loadPostDetail(post._id));
 
-            card.append(title, description);
+            card.append(
+                cover,
+                categoryLabel,
+                title,
+                description
+            );
 
             if (fullDescription.length > previewLength) {
                 const readMoreButton = document.createElement("button");

@@ -5,6 +5,33 @@ const signupMessage = document.querySelector("#signup-message");
 const loginForm = document.querySelector("#login-form");
 const loginMessage = document.querySelector("#login-message");
 
+
+// Shared theme management
+
+const themeToggle = document.querySelector("#themeToggle");
+
+function applyTheme(theme) {
+    document.body.classList.toggle("light", theme === "light");
+
+    if (themeToggle) {
+        themeToggle.textContent =
+            theme === "light" ? "🌙" : "☀️";
+    }
+
+    localStorage.setItem("blog-theme", theme);
+}
+
+applyTheme(localStorage.getItem("blog-theme") || "dark");
+
+themeToggle?.addEventListener("click", () => {
+    const theme = document.body.classList.contains("light")
+        ? "dark"
+        : "light";
+
+    applyTheme(theme);
+});
+
+
 signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     signupMessage.textContent = "Creating account...";
@@ -57,6 +84,7 @@ loginForm.addEventListener("submit", async (event) => {
         }
 
         localStorage.setItem("token", result.token);
+        localStorage.setItem("username", userData.username);
         loginMessage.textContent = "Logged in successfully.";
         loginForm.reset();
     } catch (error) {
