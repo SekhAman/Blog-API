@@ -220,51 +220,36 @@ async function loadPosts(search = "") {
             return;
         }
 
+
         data.posts.forEach((post) => {
             const card = document.createElement("article");
             card.className = "post-card";
 
+            // Cover image
+            const cover = document.createElement("img");
+            cover.className = "post-cover";
+            cover.alt = `Cover image for ${post.title}`;
+            cover.loading = "lazy";
+
+            cover.src = post.coverImage || "images/default-cover.jpg";
+
+            cover.onerror = () => {
+                // Avoid an infinite fallback loop
+                cover.onerror = null;
+                cover.src = "images/default-cover.jpg";
+            };
+
+            // Title
             const title = document.createElement("h2");
             title.textContent = post.title;
 
+            // Description
             const description = document.createElement("p");
             description.className = "post-description";
 
             const fullDescription = post.description || "";
             const previewLength = 120;
             let isExpanded = false;
-
-            const editButton = document.createElement("button");
-            editButton.textContent = "Edit";
-            editButton.addEventListener("click", () => {
-                showEditForm(post);
-
-                const card = document.createElement("article");
-                card.className = "post-card";
-
-                // Cover image
-                const coverUrl = post.coverImage || post.imageUrl;
-
-                let cover;
-
-                if (coverUrl) {
-                    cover = document.createElement("img");
-                    cover.src = coverUrl;
-                    cover.alt = "Post cover";
-                    cover.className = "post-cover";
-                    cover.loading = "lazy";
-                } else {
-                    cover = document.createElement("div");
-                    cover.className = "post-cover";
-                    cover.setAttribute("aria-hidden", "true");
-                }
-            });
-
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Delete";
-            deleteButton.addEventListener("click", () => {
-                showDeleteConfirmation(post);
-            });
 
             function updateDescription() {
                 description.textContent =
@@ -275,20 +260,19 @@ async function loadPosts(search = "") {
 
             updateDescription();
 
+            // Author
             const author = document.createElement("p");
             author.className = "post-author";
             author.textContent = `By ${post.author?.username || "Unknown author"}`;
 
+            // View button
             const viewButton = document.createElement("button");
             viewButton.textContent = "View post";
-            viewButton.addEventListener("click", () => loadPostDetail(post._id));
+            viewButton.addEventListener("click", () => {
+                loadPostDetail(post._id);
+            });
 
-            card.append(
-                cover,
-                title,
-                description
-            );
-
+            // Read more button
             if (fullDescription.length > previewLength) {
                 const readMoreButton = document.createElement("button");
                 readMoreButton.textContent = "Read more";
@@ -296,29 +280,42 @@ async function loadPosts(search = "") {
                 readMoreButton.addEventListener("click", () => {
                     isExpanded = !isExpanded;
                     updateDescription();
-                    readMoreButton.textContent = isExpanded ? "Show less" : "Read more";
+                    readMoreButton.textContent = isExpanded
+                        ? "Show less"
+                        : "Read more";
                 });
 
-                card.append(readMoreButton);
-
-                const cover = document.createElement("img");
-
-                cover.className = "post-cover";
-                cover.alt = `Cover image for ${post.title}`;
-                cover.loading = "lazy";
-
-                cover.src = post.coverImage || "images/default-cover.jpg";
-
-                cover.onerror = () => {
-                    cover.src = "images/default-cover.jpg";
-                };
-
-                card.appendChild(cover);
+                card.appendChild(readMoreButton);
             }
 
-            card.append(author, viewButton, editButton, deleteButton);
+            // Edit button
+            const editButton = document.createElement("button");
+            editButton.textContent = "Edit";
+            editButton.addEventListener("click", () => {
+                showEditForm(post);
+            });
+
+            // Delete button
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.addEventListener("click", () => {
+                showDeleteConfirmation(post);
+            });
+
+            // Add everything to the card
+            card.append(
+                cover,
+                title,
+                description,
+                author,
+                viewButton,
+                editButton,
+                deleteButton
+            );
+
             postsContainer.appendChild(card);
         });
+
     } catch (error) {
         const message = document.createElement("p");
         message.className = "error-message";
