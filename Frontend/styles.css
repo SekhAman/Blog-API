@@ -795,6 +795,14 @@ textarea:focus {
     }
 }
 
+.post-cover {
+    width: 100%;
+    height: 190px;
+    display: block;
+    object-fit: cover;
+    border-radius: 17px 17px 0 0;
+}
+
 /* =================================
    20. ACCESSIBILITY
 ================================= */

@@ -1,151 +1,172 @@
-
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0b1020" />
-  <title>BlogSpace - Share Your Story</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1020" />
+    <title>BlogSpace - Share Your Story</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
 
-<body>
-  <header class="navbar">
-    <a class="logo" href="index.html">◈ BlogSpace</a>
+  <body>
+    <header class="navbar">
+      <a class="logo" href="index.html">◈ BlogSpace</a>
 
-    <nav class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="#posts">Explore</a>
-      <a href="#categories">Categories</a>
-      <a class="account-link" href="account.html">Account</a>
-      <button id="themeToggle" class="theme-toggle" type="button"
-        aria-label="Toggle color theme">☀️</button>
-      <div id="profile-avatar" class="profile-avatar">A</div>
-    </nav>
-  </header>
-
-  <main class="page">
-
-    <section class="hero">
-      <span class="eyebrow">YOUR SPACE TO SHARE</span>
-
-      <h1>
-        Discover ideas.<br>
-        <span>Share your story.</span>
-      </h1>
-
-      <p>A place for thoughts, creativity and inspiration.</p>
-
-      <form id="search-form">
-        <input
-          id="search-input"
-          type="search"
-          placeholder="Search interesting posts..."
-          aria-label="Search posts"
-        />
-        <button type="submit">Search</button>
-      </form>
-
-      <button id="show-create-form" type="button">
-        + Create a post
-      </button>
-    </section>
-
-    <section id="create-post-view" class="form-panel" hidden>
-      <h2>Create a post</h2>
-
-      <form id="create-post-form">
-        <label>
-          Title
-          <input name="title" required />
-        </label>
-
-        <label>
-          Description
-          <textarea name="description" required></textarea>
-        </label>
-
-        <button type="submit">Publish post</button>
-        <button id="cancel-create-form" type="button" class="secondary-btn">
-          Cancel
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="#posts">Explore</a>
+        <a href="#categories">Categories</a>
+        <a class="account-link" href="account.html">Account</a>
+        <button
+          id="themeToggle"
+          class="theme-toggle"
+          type="button"
+          aria-label="Toggle color theme"
+        >
+          ☀️
         </button>
-      </form>
-
-      <p id="create-post-message" aria-live="polite"></p>
-    </section>
-
-    <section id="edit-post-view" class="form-panel" hidden>
-      <h2>Edit post</h2>
-
-      <form id="edit-post-form">
-        <label>
-          Title
-          <input name="title" required>
-        </label>
-
-        <label>
-          Description
-          <textarea name="description" required></textarea>
-        </label>
-
-        <button type="submit">Save changes</button>
-        <button id="cancel-edit-form" type="button" class="secondary-btn">
-          Cancel
-        </button>
-      </form>
-
-      <p id="edit-post-message" aria-live="polite"></p>
-    </section>
-
-    <section id="delete-post-view" class="form-panel" hidden>
-      <h2>Delete post?</h2>
-      <p id="delete-post-title"></p>
-
-      <button id="confirm-delete" type="button" class="delete-btn">
-        Yes, delete
-      </button>
-
-      <button id="cancel-delete" type="button" class="secondary-btn">
-        Cancel
-      </button>
-
-      <p id="delete-post-message" aria-live="polite"></p>
-    </section>
-
-    <section class="posts-section">
-
-      <div class="section-heading">
-        <div>
-          <span class="eyebrow">EXPLORE CONTENT</span>
-          <h2 id="latest-posts">Latest posts</h2>
-          <p>Discover what people are sharing.</p>
-        </div>
-      </div>
-
-      <div id="categories" class="categories" aria-label="Post categories">
-        <button class="category active" type="button"
-          data-category="all">All posts</button>
-      </div>
-
-      <section id="post-detail" aria-live="polite"></section>
-
-      <section id="posts" class="posts-grid"
-        aria-label="Blog posts"></section>
-
-      <nav class="pagination" aria-label="Post pages">
-        <button id="previous-page" type="button">← Previous</button>
-        <span id="page-info">Page 1</span>
-        <button id="next-page" type="button">Next →</button>
+        <div id="profile-avatar" class="profile-avatar">A</div>
       </nav>
+    </header>
 
-    </section>
+    <main class="page">
+      <section class="hero">
+        <span class="eyebrow">YOUR SPACE TO SHARE</span>
 
-  </main>
+        <h1>
+          Discover ideas.<br />
+          <span>Share your story.</span>
+        </h1>
 
-  <footer class="footer">
-    <p>© 2026 BlogSpace. Made for sharing ideas.</p>
-  </footer>
+        <p>A place for thoughts, creativity and inspiration.</p>
 
-  <script src="script.js"></script>
-</body>
+        <form id="search-form">
+          <input
+            id="search-input"
+            type="search"
+            placeholder="Search interesting posts..."
+            aria-label="Search posts"
+          />
+          <button type="submit">Search</button>
+        </form>
+
+        <button id="show-create-form" type="button">+ Create a post</button>
+      </section>
+
+      <section id="create-post-view" class="form-panel" hidden>
+        <h2>Create a post</h2>
+
+        <form id="create-post-form">
+          <label>
+            Title
+            <input name="title" required />
+          </label>
+
+          <label>
+            Description
+            <textarea name="description" required></textarea>
+          </label>
+
+          <label>
+            Cover image URL
+            <input
+              name="coverImage"
+              type="url"
+              placeholder="https://example.com/image.jpg"
+            />
+          </label>
+
+          <button type="submit">Publish post</button>
+          <button id="cancel-create-form" type="button" class="secondary-btn">
+            Cancel
+          </button>
+        </form>
+
+        <p id="create-post-message" aria-live="polite"></p>
+      </section>
+
+      <section id="edit-post-view" class="form-panel" hidden>
+        <h2>Edit post</h2>
+
+        <form id="edit-post-form">
+          <label>
+            Title
+            <input name="title" required />
+          </label>
+
+          <label>
+            Description
+            <textarea name="description" required></textarea>
+          </label>
+
+          <label>
+            Cover image URL
+            <input
+              name="coverImage"
+              type="url"
+              placeholder="https://example.com/image.jpg"
+            />
+          </label>
+
+          <button type="submit">Save changes</button>
+          <button id="cancel-edit-form" type="button" class="secondary-btn">
+            Cancel
+          </button>
+        </form>
+
+        <p id="edit-post-message" aria-live="polite"></p>
+      </section>
+
+      <section id="delete-post-view" class="form-panel" hidden>
+        <h2>Delete post?</h2>
+        <p id="delete-post-title"></p>
+
+        <button id="confirm-delete" type="button" class="delete-btn">
+          Yes, delete
+        </button>
+
+        <button id="cancel-delete" type="button" class="secondary-btn">
+          Cancel
+        </button>
+
+        <p id="delete-post-message" aria-live="polite"></p>
+      </section>
+
+      <section class="posts-section">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">EXPLORE CONTENT</span>
+            <h2 id="latest-posts">Latest posts</h2>
+            <p>Discover what people are sharing.</p>
+          </div>
+        </div>
+
+        <div id="categories" class="categories" aria-label="Post categories">
+          <button class="category active" type="button" data-category="all">
+            All posts
+          </button>
+        </div>
+
+        <section id="post-detail" aria-live="polite"></section>
+
+        <section
+          id="posts"
+          class="posts-grid"
+          aria-label="Blog posts"
+        ></section>
+
+        <nav class="pagination" aria-label="Post pages">
+          <button id="previous-page" type="button">← Previous</button>
+          <span id="page-info">Page 1</span>
+          <button id="next-page" type="button">Next →</button>
+        </nav>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>© 2026 BlogSpace. Made for sharing ideas.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
 </html>
