@@ -1,504 +1,575 @@
-const searchForm = document.querySelector("#search-form");
-const searchInput = document.querySelector("#search-input");
 
-searchForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    currentPage = 1;
-    loadPosts(searchInput.value.trim());
-});
+const API_URL = "https://blog-api-9wsb.onrender.com";
+
+// =====================================
+// 1. ELEMENTS
+// =====================================
+
+const postsContainer = document.getElementById("posts");
+const searchForm = document.getElementById("search-form");
+const searchInput = document.getElementById("search-input");
+
+const previousPageButton = document.getElementById("previous-page");
+const nextPageButton = document.getElementById("next-page");
+const pageInfo = document.getElementById("page-info");
+
+const createPostButton = document.getElementById("show-create-form");
+const createPostView = document.getElementById("create-post-view");
+const createPostForm = document.getElementById("create-post-form");
+const createPostMessage = document.getElementById("create-post-message");
+const cancelCreateButton = document.getElementById("cancel-create-form");
+
+const editPostView = document.getElementById("edit-post-view");
+const editPostForm = document.getElementById("edit-post-form");
+const editPostMessage = document.getElementById("edit-post-message");
+const cancelEditButton = document.getElementById("cancel-edit-form");
+
+const deletePostView = document.getElementById("delete-post-view");
+const deletePostTitle = document.getElementById("delete-post-title");
+const confirmDeleteButton = document.getElementById("confirm-delete");
+const cancelDeleteButton = document.getElementById("cancel-delete");
+const deletePostMessage = document.getElementById("delete-post-message");
+
+const postDetail = document.getElementById("post-detail");
+const themeToggle = document.getElementById("themeToggle");
+const profileAvatar = document.getElementById("profile-avatar");
+
+// =====================================
+// 2. STATE
+// =====================================
 
 let currentPage = 1;
 let totalPages = 1;
+let currentSearch = "";
 
-const previousButton = document.querySelector("#previous-page");
-const nextButton = document.querySelector("#next-page");
-const pageInfo = document.querySelector("#page-info");
+let selectedPostId = null;
+let selectedDeletePostId = null;
 
-const createPostForm = document.querySelector("#create-post-form");
-const createPostMessage = document.querySelector("#create-post-message");
+let posts = [];
 
-const editPostView = document.querySelector("#edit-post-view");
-const editPostForm = document.querySelector("#edit-post-form");
-const editPostMessage = document.querySelector("#edit-post-message");
-const cancelEditFormButton = document.querySelector("#cancel-edit-form");
+// =====================================
+// 3. AUTHENTICATION
+// =====================================
 
-let postBeingEdited = null;
+function getToken() {
+    return localStorage.getItem("token");
+}
 
-const deletePostView = document.querySelector("#delete-post-view");
-const deletePostTitle = document.querySelector("#delete-post-title");
-const confirmDeleteButton = document.querySelector("#confirm-delete");
-const cancelDeleteButton = document.querySelector("#cancel-delete");
-const deletePostMessage = document.querySelector("#delete-post-message");
+function isLoggedIn() {
+    return Boolean(getToken());
+}
 
-let postBeingDeleted = null;
+function updateAuthUI() {
+    const loggedIn = isLoggedIn();
 
+    createPostButton.hidden = !loggedIn;
+    profileAvatar.hidden = !loggedIn;
 
+    if (loggedIn) {
+        const username = localStorage.getItem("username") || "User";
+        profileAvatar.textContent = username.charAt(0).toUpperCase();
+        profileAvatar.title = username;
+    } else {
+        createPostView.hidden = true;
+        editPostView.hidden = true;
+        deletePostView.hidden = true;
+    }
+}
 
-
-
-// =================================
-// THEME MANAGEMENT
-// =================================
-
-const themeToggle = document.querySelector("#themeToggle");
+// =====================================
+// 4. THEME TOGGLE
+// =====================================
 
 function applyTheme(theme) {
     document.body.classList.toggle("light", theme === "light");
 
-    if (themeToggle) {
-        themeToggle.textContent =
-            theme === "light" ? "🌙" : "☀️";
-    }
-
-    localStorage.setItem("blog-theme", theme);
+    themeToggle.textContent = theme === "light" ? "🌙" : "☀️";
+    themeToggle.setAttribute(
+        "aria-label",
+        theme === "light" ? "Switch to dark theme" : "Switch to light theme"
+    );
 }
 
-applyTheme(localStorage.getItem("blog-theme") || "dark");
+const savedTheme = localStorage.getItem("blog-theme") || "dark";
+applyTheme(savedTheme);
 
-themeToggle?.addEventListener("click", () => {
+themeToggle.addEventListener("click", () => {
     const newTheme = document.body.classList.contains("light")
         ? "dark"
         : "light";
 
+    localStorage.setItem("blog-theme", newTheme);
     applyTheme(newTheme);
 });
 
-// =================================
-// PROFILE AVATAR
-// =================================
+// =====================================
+// 5. HELPER FUNCTIONS
+// =====================================
 
-const profileAvatar = document.querySelector("#profile-avatar");
-
-if (profileAvatar) {
-    const username = localStorage.getItem("username") || "Guest";
-    profileAvatar.textContent = username.charAt(0).toUpperCase();
-    profileAvatar.title = username;
+function hideAllForms() {
+    createPostView.hidden = true;
+    editPostView.hidden = true;
+    deletePostView.hidden = true;
 }
 
+function escapeHTML(value = "") {
+    return String(value).replace(/[&<>"']/g, character => {
+        const entities = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        };
 
-async function loadPostDetail(postId) {
-    const detailContainer = document.querySelector("#post-detail");
-    detailContainer.textContent = "Loading post...";
+        return entities[character];
+    });
+}
 
-    try {
-        const response = await fetch(`https://blog-api-9wsb.onrender.com/post/${postId}`);
-
-        if (!response.ok) {
-            throw new Error(`Request failed: ${response.status}`);
-        }
-
-        const post = await response.json();
-
-        const title = document.createElement("h2");
-        title.textContent = post.title;
-
-        const description = document.createElement("p");
-        const fullDescription = post.description;
-        const previewLength = 200;
-        let isExpanded = false;
-
-        function updateDescription() {
-            if (isExpanded || fullDescription.length <= previewLength) {
-                description.textContent = fullDescription;
-                return;
-            }
-
-            description.textContent = `${fullDescription.slice(0, previewLength)}...`;
-        }
-
-        updateDescription();
-
-        let toggleButton;
-
-        if (fullDescription.length > previewLength) {
-            toggleButton = document.createElement("button");
-            toggleButton.textContent = "Read more";
-            toggleButton.addEventListener("click", () => {
-                isExpanded = !isExpanded;
-                updateDescription();
-                toggleButton.textContent = isExpanded ? "Show less" : "Read more";
-            });
-        }
-
-        const date = document.createElement("p");
-        date.textContent = `Posted on ${new Date(post.createdAt).toLocaleDateString()}`;
-
-        const author = document.createElement("p");
-        author.textContent = `By ${post.author?.username || "Unknown author"}`;
-
-        const closeButton = document.createElement("button");
-        closeButton.textContent = "Close";
-        closeButton.addEventListener("click", () => {
-            detailContainer.replaceChildren();
-        });
-
-        const detailElements = [title, description];
-
-        if (toggleButton) {
-            detailElements.push(toggleButton);
-        }
-
-        detailElements.push(date, author, closeButton);
-        detailContainer.replaceChildren(...detailElements);
-
-        detailContainer.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
-    } catch (error) {
-        detailContainer.textContent = `Could not load post: ${error.message}`;
+function getAuthorName(post) {
+    if (post.author && typeof post.author === "object") {
+        return post.author.username || "Unknown author";
     }
+
+    return "Unknown author";
 }
 
-function showEditForm(post) {
-    postBeingEdited = post;
-
-    const titleInput = editPostForm.querySelector('[name="title"]');
-    const descriptionInput = editPostForm.querySelector('[name="description"]');
-
-    titleInput.value = post.title;
-    descriptionInput.value = post.description;
-
-    editPostMessage.textContent = "";
-    editPostView.hidden = false;
-    showCreateFormButton.hidden = true;
-
-    postsViewElements.forEach((element) => {
-        element.hidden = true;
-    });
+function getPostId(post) {
+    return post._id || post.id;
 }
 
-function showDeleteConfirmation(post) {
-    postBeingDeleted = post;
-
-    deletePostTitle.textContent = `Are you sure you want to delete "${post.title}"?`;
-    deletePostMessage.textContent = "";
-
-    deletePostView.hidden = false;
-    showCreateFormButton.hidden = true;
-
-    postsViewElements.forEach((element) => {
-        element.hidden = true;
-    });
+function showMessage(element, message, isError = false) {
+    element.textContent = message;
+    element.style.color = isError ? "#ef4444" : "";
 }
 
-async function loadPosts(search = "") {
-    const postsContainer = document.querySelector("#posts");
-    const url = new URL("https://blog-api-9wsb.onrender.com/post");
+// =====================================
+// 6. CREATE POST FORM VISIBILITY
+// =====================================
 
-    url.searchParams.set("search", search);
-    url.searchParams.set("page", currentPage);
-    url.searchParams.set("limit", 5);
+createPostButton.addEventListener("click", () => {
+    if (!isLoggedIn()) {
+        alert("Please log in to create a post.");
+        return;
+    }
 
+    hideAllForms();
+    createPostView.hidden = false;
+    createPostView.scrollIntoView({ behavior: "smooth" });
+});
 
-    // Use this URL in fetch:
+cancelCreateButton.addEventListener("click", () => {
+    createPostView.hidden = true;
+    createPostForm.reset();
+    createPostMessage.textContent = "";
+});
 
-    postsContainer.textContent = "Loading posts...";
+// =====================================
+// 7. CREATE POST
+// =====================================
+
+createPostForm.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (!isLoggedIn()) {
+        showMessage(createPostMessage, "Please log in first.", true);
+        updateAuthUI();
+        return;
+    }
+
+    const token = getToken();
+    const formData = new FormData(createPostForm);
+
+    const title = formData.get("title")?.trim();
+    const description = formData.get("description")?.trim();
+
+    if (!title || !description) {
+        showMessage(createPostMessage, "Title and description are required.", true);
+        return;
+    }
+
+    showMessage(createPostMessage, "Publishing post...");
 
     try {
-
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || `Request failed: ${response.status}`);
-        }
+        const response = await fetch(`${API_URL}/post`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            body: formData
+        });
 
         const data = await response.json();
 
-
-        currentPage = data.currentPage;
-        totalPages = data.totalPages;
-        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-        previousButton.disabled = currentPage <= 1;
-        nextButton.disabled = currentPage >= totalPages;
-
-        postsContainer.textContent = "";
-
-        if (data.posts.length === 0) {
-            postsContainer.textContent = "No posts yet.";
-            return;
+        if (!response.ok) {
+            throw new Error(data.message || "Could not create post.");
         }
 
+        showMessage(createPostMessage, "Post published successfully!");
 
-        data.posts.forEach((post) => {
-            const card = document.createElement("article");
-            card.className = "post-card";
+        createPostForm.reset();
 
-            // Cover image
-            const cover = document.createElement("img");
-            cover.className = "post-cover";
-            cover.alt = `Cover image for ${post.title}`;
-            cover.loading = "lazy";
-
-            cover.src = post.coverImage || "images/default-cover.jpg";
-
-            cover.onerror = () => {
-                // Avoid an infinite fallback loop
-                cover.onerror = null;
-                cover.src = "images/default-cover.jpg";
-            };
-
-            // Title
-            const title = document.createElement("h2");
-            title.textContent = post.title;
-
-            // Description
-            const description = document.createElement("p");
-            description.className = "post-description";
-
-            const fullDescription = post.description || "";
-            const previewLength = 120;
-            let isExpanded = false;
-
-            function updateDescription() {
-                description.textContent =
-                    isExpanded || fullDescription.length <= previewLength
-                        ? fullDescription
-                        : `${fullDescription.slice(0, previewLength)}...`;
-            }
-
-            updateDescription();
-
-            // Author
-            const author = document.createElement("p");
-            author.className = "post-author";
-            author.textContent = `By ${post.author?.username || "Unknown author"}`;
-
-            // View button
-            const viewButton = document.createElement("button");
-            viewButton.textContent = "View post";
-            viewButton.addEventListener("click", () => {
-                loadPostDetail(post._id);
-            });
-
-            // Read more button
-            if (fullDescription.length > previewLength) {
-                const readMoreButton = document.createElement("button");
-                readMoreButton.textContent = "Read more";
-
-                readMoreButton.addEventListener("click", () => {
-                    isExpanded = !isExpanded;
-                    updateDescription();
-                    readMoreButton.textContent = isExpanded
-                        ? "Show less"
-                        : "Read more";
-                });
-
-                card.appendChild(readMoreButton);
-            }
-
-            // Edit button
-            const editButton = document.createElement("button");
-            editButton.textContent = "Edit";
-            editButton.addEventListener("click", () => {
-                showEditForm(post);
-            });
-
-            // Delete button
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Delete";
-            deleteButton.addEventListener("click", () => {
-                showDeleteConfirmation(post);
-            });
-
-            // Add everything to the card
-            card.append(
-                cover,
-                title,
-                description,
-                author,
-                viewButton,
-                editButton,
-                deleteButton
-            );
-
-            postsContainer.appendChild(card);
-        });
+        setTimeout(() => {
+            hideAllForms();
+            currentPage = 1;
+            loadPosts();
+        }, 800);
 
     } catch (error) {
-        const message = document.createElement("p");
-        message.className = "error-message";
-        message.textContent = `Could not load posts: ${error.message}`;
-        postsContainer.replaceChildren(message);
+        showMessage(createPostMessage, error.message, true);
     }
-}
-const showCreateFormButton = document.querySelector("#show-create-form");
-const createPostView = document.querySelector("#create-post-view");
-const cancelCreateFormButton = document.querySelector("#cancel-create-form");
-
-const postsViewElements = [
-    document.querySelector("#latest-posts"),
-    document.querySelector("#search-form"),
-    document.querySelector("#post-detail"),
-    document.querySelector("#posts"),
-    document.querySelector(".pagination")
-];
-
-
-showCreateFormButton.addEventListener("click", () => {
-    postsViewElements.forEach((element) => element.hidden = true);
-    showCreateFormButton.hidden = true;
-    createPostView.hidden = false;
 });
 
-cancelCreateFormButton.addEventListener("click", () => {
-    createPostView.hidden = true;
-    showCreateFormButton.hidden = false;
-    postsViewElements.forEach((element) => element.hidden = false);
-});
+// =====================================
+// 8. LOAD ALL POSTS
+// =====================================
 
-cancelEditFormButton.addEventListener("click", () => {
-    editPostView.hidden = true;
-    showCreateFormButton.hidden = false;
-
-    postsViewElements.forEach((element) => {
-        element.hidden = false;
-    });
-
-    postBeingEdited = null;
-});
-
-createPostForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    createPostMessage.textContent = "Creating post...";
-
-    const token = localStorage.getItem("token");
-    const formData = new FormData(createPostForm);
-    const postData = Object.fromEntries(formData.entries());
+async function loadPosts() {
+    postsContainer.innerHTML = "<p>Loading posts...</p>";
 
     try {
-        const response = await fetch("https://blog-api-9wsb.onrender.com/post", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify(postData)
+        const query = new URLSearchParams({
+            search: currentSearch,
+            page: currentPage,
+            limit: 5
         });
 
-        const result = await response.json();
+        const response = await fetch(`${API_URL}/post?${query}`);
+
+        const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(result.message || `Request failed: ${response.status}`);
+            throw new Error(data.message || "Could not load posts.");
         }
 
-        createPostMessage.textContent = "Post created.";
-        createPostView.hidden = true;
-        showCreateFormButton.hidden = false;
-        postsViewElements.forEach((element) => element.hidden = false);
-        currentPage = 1;
-        loadPosts(searchInput.value.trim());
+        posts = data.posts || [];
+        totalPages = data.totalPages || 1;
+        currentPage = data.currentPage || currentPage;
+
+        renderPosts(posts);
+        updatePagination();
+
     } catch (error) {
-        createPostMessage.textContent = `Could not create post: ${error.message}`;
+        postsContainer.innerHTML = `
+            <p class="error-message">
+                ${escapeHTML(error.message)}
+            </p>
+        `;
     }
+}
+
+// =====================================
+// 9. DISPLAY POSTS
+// =====================================
+
+function renderPosts(postList) {
+    postsContainer.innerHTML = "";
+
+    if (!postList.length) {
+        postsContainer.innerHTML = "<p>No posts found.</p>";
+        return;
+    }
+
+    const loggedIn = isLoggedIn();
+
+    postList.forEach(post => {
+        const postId = getPostId(post);
+
+        const card = document.createElement("article");
+        card.className = "post-card";
+
+        const image = post.imageUrl
+            ? `
+                <img
+                    class="post-cover"
+                    src="${escapeHTML(post.imageUrl)}"
+                    alt="${escapeHTML(post.title)}"
+                    loading="lazy"
+                    onerror="this.style.display='none'"
+                >
+            `
+            : "";
+
+        const author = escapeHTML(getAuthorName(post));
+        const title = escapeHTML(post.title);
+        const description = escapeHTML(post.description || "");
+
+        card.innerHTML = `
+            ${image}
+
+            <h2>${title}</h2>
+
+            <p class="post-description">
+                ${description}
+            </p>
+
+            <p class="post-author">
+                By ${author}
+            </p>
+
+            <button type="button" class="read-btn">
+                Read More
+            </button>
+
+            ${loggedIn
+                ? `
+                        <button type="button" class="edit-btn secondary-btn">
+                            Edit
+                        </button>
+
+                        <button type="button" class="delete-btn">
+                            Delete
+                        </button>
+                    `
+                : ""
+            }
+        `;
+
+        card.querySelector(".read-btn").addEventListener("click", () => {
+            loadPostDetail(postId);
+        });
+
+        if (loggedIn) {
+            card.querySelector(".edit-btn").addEventListener("click", () => {
+                showEditForm(postId);
+            });
+
+            card.querySelector(".delete-btn").addEventListener("click", () => {
+                showDeleteConfirmation(postId, post.title);
+            });
+        }
+
+        postsContainer.appendChild(card);
+    });
+}
+
+// =====================================
+// 10. POST DETAILS
+// =====================================
+
+async function loadPostDetail(postId) {
+    hideAllForms();
+
+    postDetail.innerHTML = "<p>Loading post...</p>";
+    postDetail.scrollIntoView({ behavior: "smooth" });
+
+    try {
+        const response = await fetch(`${API_URL}/post/${encodeURIComponent(postId)}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Could not load post.");
+        }
+
+        const post = data.post || data;
+        const image = post.imageUrl
+            ? `
+                <img
+                    class="post-cover detail-cover"
+                    src="${escapeHTML(post.imageUrl)}"
+                    alt="${escapeHTML(post.title)}"
+                >
+            `
+            : "";
+
+        postDetail.innerHTML = `
+            ${image}
+            <h2>${escapeHTML(post.title)}</h2>
+            <p>${escapeHTML(post.description || "")}</p>
+            <p class="post-author">
+                By ${escapeHTML(getAuthorName(post))}
+            </p>
+            <button type="button" id="close-post-detail"
+                class="secondary-btn">Close</button>
+        `;
+
+        document.getElementById("close-post-detail").addEventListener("click", () => {
+            postDetail.innerHTML = "";
+        });
+
+    } catch (error) {
+        postDetail.textContent = error.message;
+    }
+}
+
+// =====================================
+// 11. EDIT POST
+// =====================================
+
+async function showEditForm(postId) {
+    if (!isLoggedIn()) return;
+
+    const post = posts.find(item => getPostId(item) === postId);
+
+    if (!post) return;
+
+    hideAllForms();
+
+    selectedPostId = postId;
+
+    editPostForm.elements.title.value = post.title || "";
+    editPostForm.elements.description.value = post.description || "";
+
+    editPostMessage.textContent = "";
+    editPostView.hidden = false;
+
+    editPostView.scrollIntoView({ behavior: "smooth" });
+}
+
+cancelEditButton.addEventListener("click", () => {
+    editPostView.hidden = true;
+    editPostForm.reset();
+    selectedPostId = null;
 });
 
-editPostForm.addEventListener("submit", async (event) => {
+editPostForm.addEventListener("submit", async event => {
     event.preventDefault();
-    editPostMessage.textContent = "Saving changes...";
 
-    const token = localStorage.getItem("token");
-    const formData = new FormData(editPostForm);
-    const updatedPost = Object.fromEntries(formData.entries());
+    if (!isLoggedIn() || !selectedPostId) return;
+
+    const title = editPostForm.elements.title.value.trim();
+    const description = editPostForm.elements.description.value.trim();
+
+    if (!title || !description) {
+        showMessage(editPostMessage, "Please fill in all fields.", true);
+        return;
+    }
+
+    showMessage(editPostMessage, "Saving changes...");
 
     try {
         const response = await fetch(
-            `https://blog-api-9wsb.onrender.com/post/${postBeingEdited._id}`,
+            `${API_URL}/post/${encodeURIComponent(selectedPostId)}`,
             {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
+                    Authorization: `Bearer ${getToken()}`
                 },
-                body: JSON.stringify(updatedPost)
+                body: JSON.stringify({ title, description })
             }
         );
 
-        const result = await response.json();
+        const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(result.message || `Request failed: ${response.status}`);
+            throw new Error(data.message || "Could not update post.");
         }
 
-        editPostMessage.textContent = "Post updated.";
-        editPostView.hidden = true;
-        showCreateFormButton.hidden = false;
-        postsViewElements.forEach((element) => {
-            element.hidden = false;
-        });
+        showMessage(editPostMessage, "Post updated successfully!");
 
-        postBeingEdited = null;
-        loadPosts(searchInput.value.trim());
+        selectedPostId = null;
+
+        setTimeout(() => {
+            hideAllForms();
+            loadPosts();
+        }, 800);
+
     } catch (error) {
-        editPostMessage.textContent = `Could not update post: ${error.message}`;
+        showMessage(editPostMessage, error.message, true);
     }
 });
 
+// =====================================
+// 12. DELETE POST
+// =====================================
+
+function showDeleteConfirmation(postId, title) {
+    if (!isLoggedIn()) return;
+
+    hideAllForms();
+
+    selectedDeletePostId = postId;
+    deletePostTitle.textContent = title;
+
+    deletePostMessage.textContent = "";
+    deletePostView.hidden = false;
+
+    deletePostView.scrollIntoView({ behavior: "smooth" });
+}
+
 cancelDeleteButton.addEventListener("click", () => {
     deletePostView.hidden = true;
-    showCreateFormButton.hidden = false;
-
-    postsViewElements.forEach((element) => {
-        element.hidden = false;
-    });
-
-    postBeingDeleted = null;
+    selectedDeletePostId = null;
 });
 
 confirmDeleteButton.addEventListener("click", async () => {
-    if (!postBeingDeleted) return;
+    if (!isLoggedIn() || !selectedDeletePostId) return;
 
-    deletePostMessage.textContent = "Deleting post...";
-
-    const token = localStorage.getItem("token");
+    showMessage(deletePostMessage, "Deleting post...");
 
     try {
         const response = await fetch(
-            `https://blog-api-9wsb.onrender.com/post/${postBeingDeleted._id}`,
+            `${API_URL}/post/${encodeURIComponent(selectedDeletePostId)}`,
             {
                 method: "DELETE",
                 headers: {
-                    "Authorization": `Bearer ${token}`
+                    Authorization: `Bearer ${getToken()}`
                 }
             }
         );
 
-        const result = await response.json();
+        const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(result.message || `Request failed: ${response.status}`);
+            throw new Error(data.message || "Could not delete post.");
         }
 
-        deletePostMessage.textContent = "Post deleted.";
+        selectedDeletePostId = null;
 
-        deletePostView.hidden = true;
-        showCreateFormButton.hidden = false;
+        if (posts.length === 1 && currentPage > 1) {
+            currentPage--;
+        }
 
-        postsViewElements.forEach((element) => {
-            element.hidden = false;
-        });
+        hideAllForms();
+        loadPosts();
 
-        postBeingDeleted = null;
-        loadPosts(searchInput.value.trim());
     } catch (error) {
-        deletePostMessage.textContent = `Could not delete post: ${error.message}`;
+        showMessage(deletePostMessage, error.message, true);
     }
 });
 
+// =====================================
+// 13. SEARCH
+// =====================================
 
-previousButton.addEventListener("click", () => {
+searchForm.addEventListener("submit", event => {
+    event.preventDefault();
+
+    currentSearch = searchInput.value.trim();
+    currentPage = 1;
+
+    loadPosts();
+});
+
+// =====================================
+// 14. PAGINATION
+// =====================================
+
+function updatePagination() {
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+
+    previousPageButton.disabled = currentPage <= 1;
+    nextPageButton.disabled = currentPage >= totalPages;
+}
+
+previousPageButton.addEventListener("click", () => {
     if (currentPage > 1) {
         currentPage--;
-        loadPosts(searchInput.value.trim());
+        loadPosts();
     }
 });
 
-nextButton.addEventListener("click", () => {
+nextPageButton.addEventListener("click", () => {
     if (currentPage < totalPages) {
         currentPage++;
-        loadPosts(searchInput.value.trim());
+        loadPosts();
     }
 });
 
+// =====================================
+// 15. INITIALIZE
+// =====================================
+
+updateAuthUI();
 loadPosts();

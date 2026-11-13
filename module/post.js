@@ -8,6 +8,10 @@ const newPost = mongoose.Schema({
     description: {
         type: String,
     },
+    imageUrl: {
+        type: String,
+        default: ""
+    },
     author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",

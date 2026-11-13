@@ -7,6 +7,9 @@ const User = require("./module/user");
 const auth = require("./middleware/auth");
 const Post = require("./module/post");
 const cors = require("cors");
+const multer = require("multer");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -17,6 +20,26 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const imageStorage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: "blog-post-images",
+        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+        resource_type: "image"
+    }
+});
+
+const uploadImage = multer({
+    storage: imageStorage,
+    limits: { fileSize: 5 * 1024 * 1024 }
+});
 
 app.post("/user", async (req, res) => {
     try {
@@ -124,7 +147,7 @@ app.post("/user/login", async (req, res) => {
 });
 
 
-app.post("/post", auth, async (req, res) => {
+app.post("/post", auth, uploadImage.single("image"), async (req, res) => {
     try {
         if (!req.body.title) {
             return res.status(400).send({
@@ -135,7 +158,8 @@ app.post("/post", auth, async (req, res) => {
         const post = new Post({
             title: req.body.title,
             description: req.body.description,
-            author: req.user.id
+            author: req.user.id,
+            imageUrl: req.file?.path || ""
         });
 
         await post.save();
@@ -356,7 +380,7 @@ app.patch("/post/:id", auth, async (req, res) => {
 
 
 app.listen(port, "0.0.0.0", () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server is running on port ${port}`);
 });
 
 

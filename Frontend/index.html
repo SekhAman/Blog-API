@@ -4,167 +4,188 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0b1020" />
-    <title>BlogSpace - Share Your Story</title>
-    <link rel="stylesheet" href="styles.css" />
+    <title>MyBlog | Share Your Stories</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
-
   <body>
+    <!-- NAVBAR -->
     <header class="navbar">
-      <a class="logo" href="index.html">◈ BlogSpace</a>
+      <a href="index.html" class="logo">MyBlog.</a>
 
       <nav class="nav-links">
         <a href="index.html">Home</a>
-        <a href="#posts">Explore</a>
-        <a href="#categories">Categories</a>
-        <a class="account-link" href="account.html">Account</a>
+        <a href="#latest-posts">Explore</a>
+        <a href="account.html" class="account-link">Account</a>
+
         <button
+          type="button"
           id="themeToggle"
           class="theme-toggle"
-          type="button"
-          aria-label="Toggle color theme"
+          aria-label="Toggle theme"
         >
           ☀️
         </button>
-        <div id="profile-avatar" class="profile-avatar">A</div>
+
+        <div id="profile-avatar" class="profile-avatar" hidden></div>
       </nav>
     </header>
 
     <main class="page">
+      <!-- HERO -->
       <section class="hero">
-        <span class="eyebrow">YOUR SPACE TO SHARE</span>
+        <span class="eyebrow">WELCOME TO MYBLOG</span>
 
-        <h1>
-          Discover ideas.<br />
-          <span>Share your story.</span>
-        </h1>
+        <h1>Stories worth <span>sharing.</span></h1>
 
-        <p>A place for thoughts, creativity and inspiration.</p>
+        <p>
+          Discover ideas, share your thoughts, and explore stories from
+          different people.
+        </p>
 
         <form id="search-form">
           <input
-            id="search-input"
             type="search"
-            placeholder="Search interesting posts..."
+            id="search-input"
+            placeholder="Search posts..."
             aria-label="Search posts"
           />
           <button type="submit">Search</button>
         </form>
 
-        <button id="show-create-form" type="button">+ Create a post</button>
+        <button type="button" id="show-create-form" hidden>
+          + Create Post
+        </button>
       </section>
 
+      <!-- CREATE POST -->
       <section id="create-post-view" class="form-panel" hidden>
-        <h2>Create a post</h2>
+        <h2>Create a new post</h2>
 
         <form id="create-post-form">
           <label>
-            Title
-            <input name="title" required />
+            Post title
+            <input
+              type="text"
+              name="title"
+              placeholder="Enter post title"
+              required
+            />
           </label>
 
           <label>
             Description
-            <textarea name="description" required></textarea>
+            <textarea
+              name="description"
+              placeholder="Write your story..."
+              required
+            ></textarea>
           </label>
 
           <label>
-            Cover image URL
+            Cover image
             <input
-              name="coverImage"
-              type="url"
-              placeholder="https://example.com/image.jpg"
+              type="file"
+              name="image"
+              accept="image/png,image/jpeg,image/webp"
             />
+            <small>JPG, PNG or WebP. Maximum size: 5 MB.</small>
           </label>
 
-          <button type="submit">Publish post</button>
-          <button id="cancel-create-form" type="button" class="secondary-btn">
-            Cancel
-          </button>
+          <div class="form-actions">
+            <button type="submit">Publish Post</button>
+            <button type="button" id="cancel-create-form" class="secondary-btn">
+              Cancel
+            </button>
+          </div>
         </form>
 
-        <p id="create-post-message" aria-live="polite"></p>
+        <p id="create-post-message"></p>
       </section>
 
+      <!-- EDIT POST -->
       <section id="edit-post-view" class="form-panel" hidden>
         <h2>Edit post</h2>
 
         <form id="edit-post-form">
           <label>
-            Title
-            <input name="title" required />
+            Post title
+            <input
+              type="text"
+              name="title"
+              placeholder="Enter post title"
+              required
+            />
           </label>
 
           <label>
             Description
-            <textarea name="description" required></textarea>
+            <textarea
+              name="description"
+              placeholder="Edit your story..."
+              required
+            ></textarea>
           </label>
 
-          <label>
-            Cover image URL
-            <input
-              name="coverImage"
-              type="url"
-              placeholder="https://example.com/image.jpg"
-            />
-          </label>
-
-          <button type="submit">Save changes</button>
-          <button id="cancel-edit-form" type="button" class="secondary-btn">
-            Cancel
-          </button>
+          <div class="form-actions">
+            <button type="submit">Save Changes</button>
+            <button type="button" id="cancel-edit-form" class="secondary-btn">
+              Cancel
+            </button>
+          </div>
         </form>
 
-        <p id="edit-post-message" aria-live="polite"></p>
+        <p id="edit-post-message"></p>
       </section>
 
+      <!-- DELETE CONFIRMATION -->
       <section id="delete-post-view" class="form-panel" hidden>
         <h2>Delete post?</h2>
-        <p id="delete-post-title"></p>
 
-        <button id="confirm-delete" type="button" class="delete-btn">
-          Yes, delete
-        </button>
+        <p>
+          Are you sure you want to delete
+          <strong id="delete-post-title"></strong>?
+        </p>
 
-        <button id="cancel-delete" type="button" class="secondary-btn">
-          Cancel
-        </button>
+        <div class="form-actions">
+          <button type="button" id="confirm-delete" class="delete-btn">
+            Delete Post
+          </button>
 
-        <p id="delete-post-message" aria-live="polite"></p>
-      </section>
-
-      <section class="posts-section">
-        <div class="section-heading">
-          <div>
-            <span class="eyebrow">EXPLORE CONTENT</span>
-            <h2 id="latest-posts">Latest posts</h2>
-            <p>Discover what people are sharing.</p>
-          </div>
-        </div>
-
-        <div id="categories" class="categories" aria-label="Post categories">
-          <button class="category active" type="button" data-category="all">
-            All posts
+          <button type="button" id="cancel-delete" class="secondary-btn">
+            Cancel
           </button>
         </div>
 
-        <section id="post-detail" aria-live="polite"></section>
+        <p id="delete-post-message"></p>
+      </section>
 
-        <section
-          id="posts"
-          class="posts-grid"
-          aria-label="Blog posts"
-        ></section>
+      <!-- POST DETAIL -->
+      <section id="post-detail"></section>
 
-        <nav class="pagination" aria-label="Post pages">
-          <button id="previous-page" type="button">← Previous</button>
+      <!-- POSTS -->
+      <section class="posts-section" id="latest-posts">
+        <div class="section-heading">
+          <h2>Latest Posts</h2>
+          <p>Explore the latest stories from our community.</p>
+        </div>
+
+        <div id="posts" class="posts-grid">
+          <!-- Posts are loaded by app.js -->
+        </div>
+
+        <div class="pagination">
+          <button type="button" id="previous-page" disabled>Previous</button>
+
           <span id="page-info">Page 1</span>
-          <button id="next-page" type="button">Next →</button>
-        </nav>
+
+          <button type="button" id="next-page" disabled>Next</button>
+        </div>
       </section>
     </main>
 
+    <!-- FOOTER -->
     <footer class="footer">
-      <p>© 2026 BlogSpace. Made for sharing ideas.</p>
+      <p>© 2026 MyBlog. All rights reserved.</p>
     </footer>
 
     <script src="app.js"></script>
