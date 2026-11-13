@@ -1,3 +1,4 @@
+
 /* =================================
    1. THEME VARIABLES
 ================================= */
@@ -45,8 +46,9 @@ body.light {
     --shadow: 0 12px 30px rgb(15 23 42 / 7%);
 }
 
+
 /* =================================
-   2. GLOBAL
+   2. GLOBAL STYLES
 ================================= */
 
 * {
@@ -61,12 +63,15 @@ body {
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
+
     color: var(--ink);
 
     background:
-        radial-gradient(ellipse at 15% 0%,
+        radial-gradient(
+            ellipse at 15% 0%,
             rgb(139 92 246 / 12%),
-            transparent 35rem),
+            transparent 35rem
+        ),
         var(--bg);
 
     transition: background 0.3s, color 0.3s;
@@ -81,18 +86,23 @@ textarea {
 button {
     min-height: 44px;
     padding: 0 18px;
+
     color: white;
     background: var(--accent);
+
     border: 1px solid var(--accent);
     border-radius: 11px;
+
     font-weight: 650;
     cursor: pointer;
+
     transition: 0.25s ease;
 }
 
 button:hover:not(:disabled) {
     background: var(--accent-hover);
     border-color: var(--accent-hover);
+
     box-shadow: 0 6px 20px rgb(139 92 246 / 20%);
     transform: translateY(-2px);
 }
@@ -119,12 +129,17 @@ textarea:focus-visible {
     outline-offset: 3px;
 }
 
+[hidden] {
+    display: none !important;
+}
+
+
 /* =================================
    3. NAVBAR
 ================================= */
 
 .navbar {
-    height: 76px;
+    min-height: 76px;
     padding: 0 5%;
 
     display: flex;
@@ -172,6 +187,7 @@ textarea:focus-visible {
     min-height: auto;
     padding: 10px 16px;
     margin: 0;
+
     color: white;
     background: var(--accent);
     border-radius: 9px;
@@ -181,8 +197,10 @@ textarea:focus-visible {
     width: 42px;
     min-height: 42px;
     padding: 0;
+
     background: var(--card);
     border-color: var(--line);
+
     font-size: 17px;
 }
 
@@ -191,6 +209,7 @@ textarea:focus-visible {
     border-color: var(--accent);
 }
 
+
 /* =================================
    4. PROFILE AVATAR
 ================================= */
@@ -198,6 +217,8 @@ textarea:focus-visible {
 .profile-avatar {
     width: 40px;
     height: 40px;
+    flex-shrink: 0;
+
     display: grid;
     place-items: center;
 
@@ -209,6 +230,7 @@ textarea:focus-visible {
     font-size: 15px;
 }
 
+
 /* =================================
    5. MAIN PAGE
 ================================= */
@@ -218,6 +240,7 @@ textarea:focus-visible {
     margin: auto;
     padding: 40px 0 70px;
 }
+
 
 /* =================================
    6. HERO
@@ -235,6 +258,7 @@ textarea:focus-visible {
 
     color: var(--accent);
     background: var(--accent-soft);
+
     border: 1px solid var(--line);
     border-radius: 30px;
 
@@ -245,6 +269,7 @@ textarea:focus-visible {
 
 .hero h1 {
     margin: 0;
+
     font-size: clamp(40px, 6vw, 68px);
     line-height: 1.12;
     letter-spacing: -2.5px;
@@ -263,6 +288,7 @@ textarea:focus-visible {
     font-size: 17px;
 }
 
+
 /* =================================
    7. SEARCH
 ================================= */
@@ -270,6 +296,7 @@ textarea:focus-visible {
 #search-form {
     display: flex;
     gap: 10px;
+
     width: min(620px, 100%);
     margin: 0 auto 20px;
 }
@@ -312,6 +339,7 @@ textarea:focus {
     resize: vertical;
 }
 
+
 /* =================================
    8. POSTS SECTION
 ================================= */
@@ -335,6 +363,13 @@ textarea:focus {
     color: var(--muted);
 }
 
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+
 /* =================================
    9. POST CARD
 ================================= */
@@ -348,7 +383,6 @@ textarea:focus {
     border-radius: 18px;
 
     box-shadow: var(--shadow);
-
     animation: fadeUp 0.45s ease both;
 
     transition:
@@ -366,8 +400,10 @@ textarea:focus {
 .post-cover {
     width: 100%;
     height: 180px;
+
     display: block;
     object-fit: cover;
+
     background: linear-gradient(135deg, #312e81, #7c3aed);
 }
 
@@ -386,33 +422,38 @@ textarea:focus {
     margin: 14px 20px;
     font-size: 20px;
     line-height: 1.4;
+    overflow-wrap: anywhere;
 }
 
 .post-description {
     margin: 0 20px 18px;
+
     color: var(--muted);
     font-size: 14px;
     line-height: 1.75;
+
     overflow-wrap: anywhere;
 }
 
 .post-author {
     margin: 12px 20px;
+
     color: var(--muted);
     font-size: 13px;
     font-weight: 600;
 }
 
-.post-card>button {
+.post-card > button {
     margin: 5px 0 18px 20px;
     min-height: 38px;
     padding: 0 13px;
     font-size: 12px;
 }
 
-.post-card>button:hover {
+.post-card > button:hover {
     transform: translateY(-1px);
 }
+
 
 /* =================================
    10. ACTION BUTTONS
@@ -447,6 +488,7 @@ textarea:focus {
     border-color: var(--accent);
     box-shadow: none;
 }
+
 
 /* =================================
    11. CREATE / EDIT / DELETE
@@ -494,6 +536,27 @@ textarea:focus {
     color: var(--muted);
 }
 
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+#create-post-form input[type="file"] {
+    padding: 10px;
+    cursor: pointer;
+}
+
+#create-post-form small {
+    color: var(--muted);
+    font-weight: 400;
+}
+
+.error-message {
+    color: var(--danger);
+}
+
+
 /* =================================
    12. POST DETAILS
 ================================= */
@@ -505,8 +568,8 @@ textarea:focus {
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 18px;
-    box-shadow: var(--shadow);
 
+    box-shadow: var(--shadow);
     animation: fadeUp 0.3s ease;
 }
 
@@ -519,6 +582,17 @@ textarea:focus {
     line-height: 1.8;
 }
 
+.detail-cover {
+    width: 100%;
+    max-height: 420px;
+    height: auto;
+
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+
 /* =================================
    13. PAGINATION
 ================================= */
@@ -528,6 +602,7 @@ textarea:focus {
     align-items: center;
     justify-content: center;
     gap: 18px;
+
     margin-top: 40px;
 }
 
@@ -550,6 +625,7 @@ textarea:focus {
     font-weight: 650;
 }
 
+
 /* =================================
    14. ACCOUNT PAGE
 ================================= */
@@ -564,6 +640,7 @@ textarea:focus {
     display: inline-flex;
     align-items: center;
     margin-bottom: 35px;
+
     color: var(--accent);
     font-weight: 700;
 }
@@ -594,22 +671,28 @@ textarea:focus {
 }
 
 .account-card {
+    min-width: 0;
     padding: 30px;
+
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 20px;
+
     box-shadow: var(--shadow);
 }
 
 .account-icon {
     width: 48px;
     height: 48px;
+
     display: grid;
     place-items: center;
+
     margin-bottom: 20px;
 
     color: white;
     background: linear-gradient(135deg, #8b5cf6, #6366f1);
+
     border-radius: 14px;
     font-size: 22px;
 }
@@ -631,6 +714,7 @@ textarea:focus {
     overflow-wrap: anywhere;
 }
 
+
 /* =================================
    15. FOOTER
 ================================= */
@@ -638,10 +722,13 @@ textarea:focus {
 .footer {
     padding: 25px;
     text-align: center;
+
     border-top: 1px solid var(--line);
+
     color: var(--muted);
     font-size: 13px;
 }
+
 
 /* =================================
    16. ANIMATIONS
@@ -659,13 +746,21 @@ textarea:focus {
     }
 }
 
+
 /* =================================
-   17. RESPONSIVE
+   17. RESPONSIVE DESIGN
 ================================= */
 
-@media (max-width: 900px) {
+/* Smaller laptops and tablets */
+
+@media (max-width: 1000px) {
+    .page {
+        width: 94%;
+    }
+
     .posts-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
     }
 
     .hero {
@@ -673,10 +768,14 @@ textarea:focus {
     }
 }
 
+
+/* Mobile devices */
+
 @media (max-width: 650px) {
     .navbar {
-        height: 65px;
-        padding: 0 4%;
+        min-height: 65px;
+        padding: 12px 4%;
+        gap: 10px;
     }
 
     .logo {
@@ -684,7 +783,7 @@ textarea:focus {
     }
 
     .nav-links {
-        gap: 12px;
+        gap: 10px;
     }
 
     .nav-links a:not(.account-link) {
@@ -696,34 +795,60 @@ textarea:focus {
         font-size: 12px;
     }
 
+    .theme-toggle {
+        width: 38px;
+        min-height: 38px;
+    }
+
+    .profile-avatar {
+        width: 36px;
+        height: 36px;
+    }
+
     .page {
         width: 92%;
-        padding-top: 15px;
+        padding: 15px 0 45px;
     }
 
     .hero {
-        padding: 55px 0;
+        padding: 45px 5px;
     }
 
     .hero h1 {
-        font-size: 40px;
+        font-size: clamp(34px, 9vw, 44px);
         letter-spacing: -1.5px;
     }
 
     .hero p {
         font-size: 14px;
+        line-height: 1.7;
     }
 
     #search-form {
+        width: 100%;
         flex-direction: column;
     }
 
-    #search-form button {
+    #search-form button,
+    #show-create-form {
         width: 100%;
     }
 
     .posts-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
+    }
+
+    .post-cover {
+        height: 190px;
+    }
+
+    .form-panel {
+        padding: 20px;
+    }
+
+    .account-page {
+        width: 92%;
     }
 
     .account-grid {
@@ -734,12 +859,43 @@ textarea:focus {
         padding: 23px;
     }
 
+    .pagination {
+        gap: 10px;
+    }
+
     .section-heading h2 {
         font-size: 26px;
     }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
 }
 
+
+/* Very small screens */
+
 @media (max-width: 380px) {
+    .navbar {
+        padding: 10px 3%;
+    }
+
+    .nav-links {
+        gap: 7px;
+    }
+
+    .hero h1 {
+        font-size: 33px;
+    }
+
+    .section-heading h2 {
+        font-size: 24px;
+    }
+
     .pagination {
         gap: 8px;
     }
@@ -749,81 +905,27 @@ textarea:focus {
         font-size: 12px;
     }
 
+    .post-card > button {
+        margin-left: 10px;
+    }
+
     .theme-toggle {
         width: 36px;
         min-height: 36px;
     }
 }
 
+
 /* =================================
    18. ACCESSIBILITY
 ================================= */
 
-[hidden] {
-    display: none !important;
-}
-
 @media (prefers-reduced-motion: reduce) {
-
     *,
     *::before,
     *::after {
         scroll-behavior: auto !important;
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
-    }
-}
-
-
-/* =================================
-   ADDITIONAL FORM AND IMAGE STYLES
-================================= */
-
-[hidden] {
-    display: none !important;
-}
-
-.form-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-#create-post-form input[type="file"] {
-    padding: 10px;
-    cursor: pointer;
-}
-
-#create-post-form small {
-    color: var(--muted);
-    font-weight: 400;
-}
-
-.detail-cover {
-    width: 100%;
-    max-height: 420px;
-    height: auto;
-    object-fit: cover;
-    border-radius: 12px;
-    margin-bottom: 20px;
-}
-
-.error-message {
-    color: var(--danger);
-}
-
-/* Keep the avatar neatly aligned */
-.profile-avatar {
-    flex-shrink: 0;
-}
-
-/* Improve smaller screens */
-@media (max-width: 500px) {
-    .form-actions {
-        flex-direction: column;
-    }
-
-    .form-actions button {
-        width: 100%;
     }
 }
