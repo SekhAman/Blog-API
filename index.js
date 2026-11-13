@@ -26,19 +26,37 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const imageStorage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-        folder: "blog-post-images",
-        allowed_formats: ["jpg", "jpeg", "png", "webp"],
-        resource_type: "image"
+const uploadImage = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, callback) => {
+        if (file.mimetype.startsWith("image/")) {
+            callback(null, true);
+        } else {
+            callback(new Error("Only image files are allowed"));
+        }
     }
 });
 
-const uploadImage = multer({
-    storage: imageStorage,
-    limits: { fileSize: 5 * 1024 * 1024 }
-});
+function uploadToCloudinary(fileBuffer) {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                folder: "blog-post-images",
+                resource_type: "image"
+            },
+            (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            }
+        );
+
+        stream.end(fileBuffer);
+    });
+}
 
 app.post("/user", async (req, res) => {
     try {
@@ -154,11 +172,15 @@ app.post("/post", auth, uploadImage.single("image"), async (req, res) => {
             });
         }
 
+        const uploadedImage = req.file
+            ? await uploadToCloudinary(req.file.buffer)
+            : null;
+
         const post = new Post({
             title: req.body.title,
             description: req.body.description,
             author: req.user.id,
-            imageUrl: req.file?.path || ""
+            imageUrl: uploadedImage?.secure_url || ""
         });
 
         await post.save();
